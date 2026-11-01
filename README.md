@@ -111,9 +111,3 @@ dan dialog Feedback (email + pesan, penghitung karakter, jebakan bot, batas 3 ki
 Halaman /tentang, /faq, /privasi, /syarat: draf isi dua bahasa di `src/content/pages.ts` (privasi dan syarat bertanda draf, perlu ditinjau pihak hukum).
 Admin: Dukungan (QRIS) dan Feedback (tandai dibaca, hapus). Opsional: isi `FEEDBACK_SALT` di `.env.local` untuk hash IP.
 Jalankan juga `supabase/migrations/0011_footer.sql`.
-
-## Belum dikerjakan
-
-Pemindai gambar (nudity, kekerasan), simpan draf, bahasa/tema tersimpan di akun, notifikasi/bookmark/trending (Fase 2),
-tombol Bagikan (poin share belum bisa terkumpul), terjemahan Bahasa Inggris untuk panel admin, tes otomatis.
-Status: belum dijalankan atau diuji (sandbox tanpa akses internet).
