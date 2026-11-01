@@ -1,0 +1,43 @@
+# Dependensi
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+
+# Next.js
+/.next/
+/out/
+next-env.d.ts
+
+# Build
+/build
+*.tsbuildinfo
+
+# Environment (JANGAN commit kunci Supabase, terutama SERVICE_ROLE_KEY)
+.env
+.env.*
+!.env.example
+
+# Supabase lokal
+/supabase/.branches
+/supabase/.temp
+
+# Log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Vercel
+.vercel
+
+# Testing
+/coverage
+
+# Editor dan OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.pem
