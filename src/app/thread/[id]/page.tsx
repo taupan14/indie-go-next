@@ -1,4 +1,5 @@
 import Link from "next/link";
+import ConfirmAction from "@/components/ConfirmAction";
 import { notFound } from "next/navigation";
 import { supabaseServer } from "@/lib/supabase/server";
 import { getLocale, makeT } from "@/i18n";
@@ -11,7 +12,13 @@ import MediaList from "@/components/MediaList";
 import ThreadActions from "@/components/ThreadActions";
 import AdSlot from "@/components/AdSlot";
 import { SideBanner } from "@/components/BannerView";
-import { addComment, toggleMembership, reportContent } from "./actions";
+import {
+  addComment,
+  toggleMembership,
+  reportContent,
+  deleteThread,
+  deleteComment,
+} from "./actions";
 
 const box = "rounded-xl border border-border bg-surface p-4";
 const btn =
@@ -29,6 +36,10 @@ export default async function ThreadPage({
   const {
     data: { user },
   } = await sb.auth.getUser();
+  const { data: me } = user
+    ? await sb.from("profiles").select("role").eq("id", user.id).maybeSingle()
+    : { data: null };
+  const isSuper = me?.role === "super_admin";
 
   const { data: th } = await sb
     .from("threads")
@@ -269,6 +280,17 @@ export default async function ThreadPage({
                   {c.body}
                 </p>
                 {c.author_id !== user.id && <Report comment={c.id} />}
+                {(c.author_id === user.id || isSuper) && (
+                  <ConfirmAction
+                    action={deleteComment}
+                    fields={{ comment_id: c.id, thread_id: id }}
+                    label="Hapus komentar"
+                    title="Hapus komentar ini?"
+                    message="Komentar beserta balasannya akan dihapus permanen."
+                    confirm="Ya, hapus"
+                    className="mt-1 text-xs text-danger hover:underline"
+                  />
+                )}
                 {comments
                   .filter((r) => r.parent_id === c.id)
                   .map((r) => (
@@ -283,6 +305,17 @@ export default async function ThreadPage({
                         {r.body}
                       </p>
                       {r.author_id !== user.id && <Report comment={r.id} />}
+                      {(r.author_id === user.id || isSuper) && (
+                        <ConfirmAction
+                          action={deleteComment}
+                          fields={{ comment_id: r.id, thread_id: id }}
+                          label="Hapus komentar"
+                          title="Hapus komentar ini?"
+                          message="Komentar ini akan dihapus permanen."
+                          confirm="Ya, hapus"
+                          className="mt-1 text-xs text-danger hover:underline"
+                        />
+                      )}
                     </div>
                   ))}
                 <details className="mt-2">
@@ -348,6 +381,19 @@ export default async function ThreadPage({
             {posted}
           </p>
           {user && th.author_id !== user.id && <Report />}
+          {user && (th.author_id === user.id || isSuper) && (
+            <div className="mt-2">
+              <ConfirmAction
+                action={deleteThread}
+                fields={{ thread_id: id }}
+                label="Hapus thread"
+                title="Hapus thread ini?"
+                message="Thread beserta semua komentar, suara, dan penilaiannya akan dihapus permanen."
+                confirm="Ya, hapus"
+                className="text-xs text-danger hover:underline"
+              />
+            </div>
+          )}
         </div>
 
         {sideBanners.map((b: any) => (

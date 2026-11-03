@@ -1,15 +1,18 @@
 import { requireSuperAdmin } from "@/lib/admin";
+import { adminT } from "@/i18n/admin";
+import ConfirmAction from "@/components/ConfirmAction";
 import { Head, ui } from "@/components/AdminUI";
 import { updateFeedback } from "./actions";
 
 export default async function FeedbackAdmin() {
+  const tt = await adminT();
   const { sb } = await requireSuperAdmin();
   const { data } = await sb
     .from("feedbacks")
     .select("id,email,message,status,created_at")
     .order("created_at", { ascending: false })
     .limit(100);
-  const fmt = new Intl.DateTimeFormat("id-ID", {
+  const fmt = new Intl.DateTimeFormat(tt("id-ID"), {
     dateStyle: "medium",
     timeStyle: "short",
     timeZone: "Asia/Jakarta",
@@ -32,7 +35,7 @@ export default async function FeedbackAdmin() {
   );
   return (
     <main className="mx-auto max-w-3xl px-4 py-6">
-      <Head title={`Feedback (${unread} baru)`} tab="sistem" />
+      <Head title={`Feedback (${unread} ${tt("baru")})`} tab="sistem" />
       <div className="space-y-2">
         {(data ?? []).map((f: any) => (
           <div
@@ -47,10 +50,10 @@ export default async function FeedbackAdmin() {
                 {f.email}
               </a>
               <span>
-                {fmt.format(new Date(f.created_at))} WIB
+                {fmt.format(new Date(f.created_at))} {tt("WIB")}
                 {f.status === "new" && (
                   <span className="ml-2 rounded-full bg-primary px-2 py-0.5 text-primary-foreground">
-                    baru
+                    {tt("baru")}
                   </span>
                 )}
               </span>
@@ -60,17 +63,25 @@ export default async function FeedbackAdmin() {
             </p>
             <div className="mt-3 flex gap-2">
               {f.status === "new" ? (
-                <Btn id={f.id} mode="read" label="Tandai dibaca" />
+                <Btn id={f.id} mode="read" label={tt("Tandai dibaca")} />
               ) : (
-                <Btn id={f.id} mode="new" label="Tandai baru" />
+                <Btn id={f.id} mode="new" label={tt("Tandai baru")} />
               )}
-              <Btn id={f.id} mode="delete" label="Hapus" />
+              <ConfirmAction
+                action={updateFeedback}
+                fields={{ id: f.id, mode: "delete" }}
+                label={tt("Hapus")}
+                title={tt("Hapus feedback?")}
+                message="Masukan ini akan dihapus permanen."
+                confirm="Ya, hapus"
+                className={ui.ghost}
+              />
             </div>
           </div>
         ))}
         {!data?.length && (
           <p className="py-10 text-center text-sm text-muted">
-            Belum ada feedback.
+            {tt("Belum ada feedback.")}
           </p>
         )}
       </div>

@@ -1,57 +1,87 @@
 import Link from "next/link";
 import { supabaseServer } from "@/lib/supabase/server";
-import { getLocale, makeT, type Locale } from "@/i18n";
+import { getLocale, makeT } from "@/i18n";
 import { BannerStrip } from "@/components/Toggles";
 import { SideBanner } from "@/components/BannerView";
 import { safeUrl } from "@/lib/media";
+import ThreadRows from "@/components/ThreadRows";
+import SearchBox from "@/components/SearchBox";
+import SearchResults, { Pager } from "@/components/SearchResults";
+import { PAGE, buildHref, cleanQuery, pickSort, termsOf } from "@/lib/search";
 
-const UNIT = {
-  id: { m: "m", h: "j", d: "h" },
-  en: { m: "m", h: "h", d: "d" },
-} as const;
-function ago(iso: string, l: Locale) {
-  const m = Math.max(
-    1,
-    Math.floor((Date.now() - new Date(iso).getTime()) / 60000),
-  );
-  if (m < 60) return m + UNIT[l].m;
-  if (m < 1440) return Math.floor(m / 60) + UNIT[l].h;
-  return Math.floor(m / 1440) + UNIT[l].d;
-}
+type SP = { q?: string; kat?: string; urut?: string; hal?: string };
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export default async function Beranda({
   searchParams,
 }: {
-  searchParams: Promise<{ urut?: string }>;
+  searchParams: Promise<SP>;
 }) {
-  const { urut } = await searchParams;
-  const popular = urut === "populer";
+  const sp = await searchParams;
+  const q = cleanQuery(sp.q);
+  const searching = q.length > 0;
+  const kat = UUID.test(sp.kat ?? "") ? sp.kat! : "";
+  const urut = pickSort(sp.urut, searching);
+  const page = Math.max(1, Number(sp.hal) || 1);
   const locale = await getLocale();
   const t = makeT(locale);
   const sb = await supabaseServer();
   const now = new Date().toISOString();
 
-  const [{ data: threads }, { data: banners }] = await Promise.all([
-    sb
-      .from("threads")
-      .select(
-        "id,title,upvote_count,comment_count,last_activity_at,categories(name,color),communities(name,slug)",
-      )
-      .eq("status", "published")
-      .order(popular ? "upvote_count" : "last_activity_at", {
-        ascending: false,
+  const list = searching
+    ? sb.rpc("search_threads", {
+        q,
+        cat: kat || null,
+        comm: null,
+        sort: urut,
+        lim: PAGE,
+        off: (page - 1) * PAGE,
       })
-      .limit(30),
-    sb.from("banners").select("*").order("sort"),
-  ]);
+    : (() => {
+        let b = sb
+          .from("threads")
+          .select(
+            "id,title,upvote_count,comment_count,last_activity_at,categories(name,color),communities(name,slug)",
+          )
+          .eq("status", "published");
+        if (kat) b = b.eq("category_id", kat);
+        return b
+          .order(urut === "populer" ? "upvote_count" : "last_activity_at", {
+            ascending: false,
+          })
+          .range((page - 1) * PAGE, page * PAGE - 1);
+      })();
+  const [{ data: rows }, { data: banners }, { data: cats }] = await Promise.all(
+    [
+      list,
+      sb.from("banners").select("*").order("sort"),
+      sb.from("categories").select("id,name,color").order("sort"),
+    ],
+  );
+  const items = (rows ?? []) as any[];
+  const total = searching ? Number(items[0]?.total ?? 0) : 0;
+  const hasNext = searching ? total > page * PAGE : items.length === PAGE;
+
   const live = (banners ?? []).filter(
     (b: any) =>
       (!b.starts_at || b.starts_at <= now) && (!b.ends_at || b.ends_at >= now),
   );
   const strips = live.filter((b: any) => b.slot === "strip").slice(0, 3);
   const side = live.filter((b: any) => b.slot === "side").slice(0, 5);
-  const tab = (on: boolean) =>
-    `rounded-full px-3 py-1 text-sm ${on ? "bg-primary text-primary-foreground" : "bg-accent"}`;
+
+  const defSort = searching ? "relevan" : "terbaru";
+  const href = (o: Record<string, string>) =>
+    buildHref("/", { q, kat, urut: urut === defSort ? "" : urut, ...o });
+  const chip = (on: boolean) =>
+    `inline-flex items-center rounded-md px-3 py-1 text-sm ${on ? "bg-primary text-primary-foreground" : "bg-accent"}`;
+  const sorts = searching
+    ? ["relevan", "terbaru", "populer"]
+    : ["terbaru", "populer"];
+  const sortLabel: Record<string, string> = {
+    relevan: t("search.relevance"),
+    terbaru: t("thread.latest"),
+    populer: t("thread.popular"),
+  };
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-5">
@@ -67,57 +97,84 @@ export default async function Beranda({
       ))}
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_260px]">
         <section>
-          <div className="mb-3 flex gap-2">
-            <Link href="/" className={tab(!popular)}>
-              {t("thread.latest")}
+          {/* Pencarian: tepat setelah banner strip pengumuman */}
+          <SearchBox
+            action="/"
+            q={q}
+            placeholder={t("search.placeholder")}
+            button={t("search.button")}
+            clearLabel={t("search.clear")}
+            hidden={{
+              kat,
+              urut: sp.urut && sp.urut !== "relevan" ? sp.urut : "",
+            }}
+          />
+          <div className="mb-3 flex flex-wrap items-center gap-1.5">
+            <Link href={href({ kat: "", hal: "" })} className={chip(!kat)}>
+              {t("search.allCategories")}
             </Link>
-            <Link href="/?urut=populer" className={tab(popular)}>
-              {t("thread.popular")}
-            </Link>
+            {(cats ?? []).map((c: any) => (
+              <Link
+                key={c.id}
+                href={href({ kat: c.id, hal: "" })}
+                className={chip(kat === c.id)}
+              >
+                <span
+                  className="mr-1.5 inline-block size-2 rounded-sm"
+                  style={{ background: c.color }}
+                />
+                {c.name}
+              </Link>
+            ))}
           </div>
-          <div className="grid grid-cols-[minmax(0,1fr)_44px_44px] sm:grid-cols-[minmax(0,1fr)_56px_56px_48px] gap-2 border-b border-border px-1 pb-2 text-xs text-muted">
-            <span>{t("home.topic")}</span>
-            <span className="text-center">{t("thread.votes")}</span>
-            <span className="text-center">{t("home.replies")}</span>
-            <span className="hidden text-center sm:block">
-              {t("thread.active")}
-            </span>
+          <div className="mb-3 flex flex-wrap items-center gap-2">
+            {sorts.map((s) => (
+              <Link
+                key={s}
+                href={href({ urut: s === defSort ? "" : s, hal: "" })}
+                className={chip(urut === s)}
+              >
+                {sortLabel[s]}
+              </Link>
+            ))}
+            {searching && (
+              <span className="ml-auto text-xs text-muted">
+                {t("search.results", { n: total, q })}
+              </span>
+            )}
           </div>
-          {(threads ?? []).map((th: any) => (
-            <Link
-              key={th.id}
-              href={`/thread/${th.id}`}
-              className="grid grid-cols-[minmax(0,1fr)_44px_44px] sm:grid-cols-[minmax(0,1fr)_56px_56px_48px] items-center gap-2 border-b border-border px-1 py-3 text-sm hover:bg-accent"
-            >
-              <span>
-                <span className="block font-medium">{th.title}</span>
-                <span className="mt-1 flex flex-wrap gap-1.5 text-xs text-muted">
-                  <span className="rounded-full border border-border px-2 py-0.5">
-                    <span
-                      className="mr-1.5 inline-block size-2 rounded-sm"
-                      style={{ background: th.categories?.color }}
-                    />
-                    {th.categories?.name}
-                  </span>
-                  {th.communities && (
-                    <span className="rounded-full border border-border px-2 py-0.5">
-                      {th.communities.name}
-                    </span>
-                  )}
-                </span>
-              </span>
-              <span className="text-center">{th.upvote_count}</span>
-              <span className="text-center">{th.comment_count}</span>
-              <span className="hidden text-center text-xs text-muted sm:block">
-                {ago(th.last_activity_at, locale)}
-              </span>
-            </Link>
-          ))}
-          {!threads?.length && (
-            <p className="py-10 text-center text-sm text-muted">
-              {t("home.empty")}
-            </p>
+
+          {searching ? (
+            <SearchResults
+              rows={items}
+              terms={termsOf(q)}
+              locale={locale}
+              none={t("search.none", { q })}
+              hint={t("search.hint")}
+            />
+          ) : (
+            <ThreadRows
+              threads={items}
+              locale={locale}
+              l={{
+                topic: t("home.topic"),
+                votes: t("thread.votes"),
+                replies: t("home.replies"),
+                active: t("thread.active"),
+                empty: t("home.empty"),
+              }}
+            />
           )}
+          <Pager
+            prev={
+              page > 1
+                ? href({ hal: page > 2 ? String(page - 1) : "" })
+                : undefined
+            }
+            next={hasNext ? href({ hal: String(page + 1) }) : undefined}
+            prevLabel={t("search.prev")}
+            nextLabel={t("search.next")}
+          />
         </section>
 
         <aside className="space-y-3">

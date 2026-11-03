@@ -39,12 +39,19 @@ export default function ThreadRows({
         >
           <span>
             <span className="block font-medium">{th.title}</span>
-            <span className="mt-1 inline-block rounded-full border border-border px-2 py-0.5 text-xs text-muted">
-              <span
-                className="mr-1.5 inline-block size-2 rounded-sm"
-                style={{ background: th.categories?.color }}
-              />
-              {th.categories?.name}
+            <span className="mt-1 flex flex-wrap gap-1.5 text-xs text-muted">
+              <span className="rounded-full border border-border px-2 py-0.5">
+                <span
+                  className="mr-1.5 inline-block size-2 rounded-sm"
+                  style={{ background: th.categories?.color }}
+                />
+                {th.categories?.name}
+              </span>
+              {th.communities && (
+                <span className="rounded-full border border-border px-2 py-0.5">
+                  {th.communities.name}
+                </span>
+              )}
             </span>
           </span>
           <span className="text-center">{th.upvote_count}</span>

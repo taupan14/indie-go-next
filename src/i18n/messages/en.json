@@ -65,7 +65,8 @@
     "viewMembers": "View members",
     "close": "Close",
     "empty": "No communities yet.",
-    "signInMembers": "Sign in to see the member list."
+    "signInMembers": "Sign in to see the member list.",
+    "blocked": "You don't have access to this community."
   },
   "auth": {
     "email": "Email",
@@ -83,7 +84,8 @@
     "verifyEmail": "Check your email to verify your account.",
     "rules": "I agree to the community rules: no pornography, drugs, gambling, human trafficking, violence, swearing, or racism.",
     "tagline": "Where ideas and answers meet",
-    "taglineSub": "Join communities, share experiences, and find answers."
+    "taglineSub": "Join communities, share experiences, and find answers.",
+    "errorBanned": "Your account has been blocked and can't be used. Contact an admin if you think this is a mistake."
   },
   "curation": {
     "rejected": "This thread can't be published because it contains prohibited content. Edit it and try again.",
@@ -136,7 +138,8 @@
     "errUpload": "Invalid photo: max 5 MB, JPG/PNG/WebP/GIF.",
     "errPassword": "Passwords don't match or are wrong.",
     "errAdmin": "You are a community admin. Ask the super admin to reassign the admin role before deleting your account.",
-    "errConfirm": "Confirmation doesn't match."
+    "errConfirm": "Confirmation doesn't match.",
+    "pickImage": "Choose photo"
   },
   "home": {
     "empty": "No threads yet. Be the first to post.",
@@ -159,7 +162,10 @@
     "errInvalid": "Please check your input.",
     "errRate": "You're posting too often. Try again in a few minutes.",
     "errUpload": "Invalid photos: max 4 photos, 5 MB each, JPG/PNG/WebP/GIF.",
-    "errLinks": "Invalid link (must start with http:// or https://, max 4)."
+    "errLinks": "Invalid link (must start with http:// or https://, max 4).",
+    "pickPhotos": "Choose photos",
+    "noFile": "No file chosen",
+    "filesChosen": "{n} files selected"
   },
   "profile": {
     "joined": "Joined",
@@ -192,7 +198,7 @@
     "reason_other": "Other"
   },
   "footer": {
-    "tagline": "Enjoying Indie Go? Buy us a coffee",
+    "tagline": "Enjoying Indie GO? Buy us a coffee",
     "sub": "Your support helps cover servers and development. Scan the QRIS code or open Saweria.",
     "saweria": "Open Saweria",
     "feedback": "Feedback",
@@ -215,5 +221,20 @@
     "errRate": "Too many submissions. Try again in a few minutes.",
     "errCuration": "The message contains prohibited content. Edit it and try again.",
     "errFailed": "Couldn't send. Please try again later."
+  },
+  "search": {
+    "placeholder": "Search threads, content, or tags...",
+    "inCommunity": "Search in this community...",
+    "communities": "Search communities...",
+    "button": "Search",
+    "clear": "Clear search",
+    "allCategories": "All categories",
+    "relevance": "Most relevant",
+    "results": "{n} results for \"{q}\"",
+    "none": "No results for \"{q}\".",
+    "hint": "Try other keywords, use fewer words, or remove the category filter.",
+    "prev": "Previous",
+    "next": "Next",
+    "noCommunity": "No communities for \"{q}\"."
   }
 }

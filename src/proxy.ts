@@ -26,6 +26,20 @@ export async function proxy(req: NextRequest) {
     data: { user },
   } = await sb.auth.getUser(); // menyegarkan sesi
   const path = req.nextUrl.pathname;
+  if (user && !path.startsWith("/masuk") && !path.startsWith("/auth")) {
+    const { data: p } = await sb
+      .from("profiles")
+      .select("status")
+      .eq("id", user.id)
+      .maybeSingle();
+    if (p?.status === "banned") {
+      // akun diblokir: keluarkan dari sesi
+      await sb.auth.signOut();
+      const r = NextResponse.redirect(new URL("/masuk?error=banned", req.url));
+      res.cookies.getAll().forEach((c) => r.cookies.set(c));
+      return r;
+    }
+  }
   if (!user && PROTECTED.some((p) => path === p || path.startsWith(p + "/"))) {
     return NextResponse.redirect(new URL("/masuk", req.url));
   }

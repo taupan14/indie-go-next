@@ -236,3 +236,23 @@ export async function recordShare(threadId: string) {
       { ignoreDuplicates: true },
     );
 }
+
+/** Hapus thread: hanya penulis atau super admin (ditegakkan RLS). Komentar, suara, dan penilaiannya ikut terhapus. */
+export async function deleteThread(fd: FormData) {
+  const id = idOf(String(fd.get("thread_id")));
+  if (!id.success) return;
+  const { sb } = await authed();
+  await sb.from("threads").delete().eq("id", id.data);
+  revalidatePath("/");
+  redirect("/");
+}
+
+/** Hapus komentar (beserta balasannya): hanya penulis komentar atau super admin (ditegakkan RLS). */
+export async function deleteComment(fd: FormData) {
+  const c = idOf(String(fd.get("comment_id")));
+  const t = idOf(String(fd.get("thread_id")));
+  if (!c.success || !t.success) return;
+  const { sb } = await authed();
+  await sb.from("comments").delete().eq("id", c.data);
+  revalidatePath(`/thread/${t.data}`);
+}

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { adminT } from "@/i18n/admin";
 import { requireSuperAdmin } from "@/lib/admin";
 
 const TABS = [
@@ -43,7 +44,7 @@ const MODULES = [
   {
     tab: "pengguna",
     title: "Pengguna",
-    desc: "Suspend atau blokir akun",
+    desc: "Blokir, buka blokir, atau hapus akun",
     href: "/admin/pengguna",
   },
   {
@@ -51,6 +52,12 @@ const MODULES = [
     title: "Dukungan (QRIS)",
     desc: "Gambar QRIS dan tautan Saweria di footer",
     href: "/admin/dukungan",
+  },
+  {
+    tab: "sistem",
+    title: "Email",
+    desc: "Templat, pengirim, dan tata letak email",
+    href: "/admin/email",
   },
   {
     tab: "sistem",
@@ -77,6 +84,7 @@ export default async function AdminHome({
 }: {
   searchParams: Promise<{ tab?: string }>;
 }) {
+  const tt = await adminT();
   const { sb } = await requireSuperAdmin();
   const { tab } = await searchParams;
   const active = TABS.find(([k]) => k === tab)?.[0] ?? "ringkasan";
@@ -97,8 +105,8 @@ export default async function AdminHome({
       : MODULES.filter((m) => m.tab === active);
 
   return (
-    <main className="mx-auto max-w-4xl px-4 py-6">
-      <h1 className="mb-3 text-xl font-medium">Panel admin</h1>
+    <main className="mx-auto max-w-5xl px-4 py-5">
+      <h1 className="mb-3 text-xl font-medium">{tt("Panel admin")}</h1>
       <div className="mb-4 flex gap-1 border-b border-border">
         {TABS.map(([k, label]) => (
           <Link
@@ -106,17 +114,17 @@ export default async function AdminHome({
             href={`/admin?tab=${k}`}
             className={`border-b-2 px-3 py-2 text-sm ${k === active ? "border-primary font-medium" : "border-transparent text-muted"}`}
           >
-            {label}
+            {tt(label)}
           </Link>
         ))}
       </div>
       {active === "ringkasan" && (
         <div className="mb-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
           {[
-            ["Pengguna", users],
-            ["Thread", threads],
-            ["Komunitas", communities],
-            ["Laporan terbuka", reports],
+            [tt("Pengguna"), users],
+            [tt("Total thread"), threads],
+            [tt("Komunitas"), communities],
+            [tt("Laporan terbuka"), reports],
           ].map(([l, n]) => (
             <div key={l as string} className="rounded-xl bg-accent p-3">
               <p className="text-xl font-medium">{n}</p>
@@ -132,28 +140,28 @@ export default async function AdminHome({
             className="rounded-xl border border-border bg-surface p-4"
           >
             <p className="font-medium">
-              {m.title}{" "}
+              {tt(m.title)}{" "}
               {m.title === "Laporan" && reports > 0 && (
                 <span className="ml-1 rounded-full bg-primary px-2 py-0.5 text-xs text-primary-foreground">
                   {reports}
                 </span>
               )}
             </p>
-            <p className="mb-3 mt-1 text-xs text-muted">{m.desc}</p>
+            <p className="mb-3 mt-1 text-xs text-muted">{tt(m.desc)}</p>
             {m.href ? (
               <Link
                 href={m.href}
                 className="rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground"
               >
-                Buka
+                {tt("Buka")}
               </Link>
             ) : (
-              <span className="text-xs text-muted">Segera hadir</span>
+              <span className="text-xs text-muted">{tt("Segera hadir")}</span>
             )}
           </div>
         ))}
         {!cards.length && (
-          <p className="text-sm text-muted">Belum ada modul.</p>
+          <p className="text-sm text-muted">{tt("Belum ada modul.")}</p>
         )}
       </div>
     </main>

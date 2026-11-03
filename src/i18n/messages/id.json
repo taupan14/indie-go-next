@@ -65,7 +65,8 @@
     "viewMembers": "Lihat anggota",
     "close": "Tutup",
     "empty": "Belum ada komunitas.",
-    "signInMembers": "Masuk untuk melihat daftar anggota."
+    "signInMembers": "Masuk untuk melihat daftar anggota.",
+    "blocked": "Anda tidak memiliki akses ke komunitas ini."
   },
   "auth": {
     "email": "Email",
@@ -83,7 +84,8 @@
     "verifyEmail": "Cek email Anda untuk memverifikasi akun.",
     "rules": "Saya menyetujui aturan komunitas: tanpa pornografi, narkoba, judi, perdagangan manusia, kekerasan, kata kasar, dan SARA.",
     "tagline": "Tempat ide dan jawaban bertemu",
-    "taglineSub": "Gabung dengan komunitas, bagikan pengalaman, dan temukan jawaban."
+    "taglineSub": "Gabung dengan komunitas, bagikan pengalaman, dan temukan jawaban.",
+    "errorBanned": "Akun Anda diblokir sehingga tidak bisa digunakan. Hubungi admin jika menurut Anda ini keliru."
   },
   "curation": {
     "rejected": "Thread tidak bisa diterbitkan karena mengandung konten yang dilarang. Ubah isinya lalu coba lagi.",
@@ -136,7 +138,8 @@
     "errUpload": "Foto tidak valid: maks. 5 MB, format JPG/PNG/WebP/GIF.",
     "errPassword": "Kata sandi tidak cocok atau salah.",
     "errAdmin": "Anda admin sebuah komunitas. Hubungi super admin untuk mengalihkan admin sebelum menghapus akun.",
-    "errConfirm": "Konfirmasi tidak sesuai."
+    "errConfirm": "Konfirmasi tidak sesuai.",
+    "pickImage": "Pilih foto"
   },
   "home": {
     "empty": "Belum ada thread. Jadilah yang pertama menulis.",
@@ -159,7 +162,10 @@
     "errInvalid": "Periksa kembali isian Anda.",
     "errRate": "Anda terlalu banyak memposting. Coba lagi dalam beberapa menit.",
     "errUpload": "Foto tidak valid: maks. 4 foto, 5 MB, format JPG/PNG/WebP/GIF.",
-    "errLinks": "Link tidak valid (harus diawali http:// atau https://, maks. 4)."
+    "errLinks": "Link tidak valid (harus diawali http:// atau https://, maks. 4).",
+    "pickPhotos": "Pilih foto",
+    "noFile": "Belum ada file dipilih",
+    "filesChosen": "{n} file dipilih"
   },
   "profile": {
     "joined": "Bergabung",
@@ -192,7 +198,7 @@
     "reason_other": "Lainnya"
   },
   "footer": {
-    "tagline": "Suka Indie Go? Traktir kami secangkir kopi",
+    "tagline": "Suka Indie GO? Traktir kami secangkir kopi",
     "sub": "Dukunganmu membantu biaya server dan pengembangan. Scan QRIS atau buka Saweria.",
     "saweria": "Buka Saweria",
     "feedback": "Feedback",
@@ -215,5 +221,20 @@
     "errRate": "Terlalu banyak kiriman. Coba lagi dalam beberapa menit.",
     "errCuration": "Pesan mengandung konten yang dilarang. Ubah lalu coba lagi.",
     "errFailed": "Gagal mengirim. Coba lagi nanti."
+  },
+  "search": {
+    "placeholder": "Cari thread, isi, atau tag...",
+    "inCommunity": "Cari di komunitas ini...",
+    "communities": "Cari komunitas...",
+    "button": "Cari",
+    "clear": "Hapus pencarian",
+    "allCategories": "Semua kategori",
+    "relevance": "Paling relevan",
+    "results": "{n} hasil untuk \"{q}\"",
+    "none": "Tidak ada hasil untuk \"{q}\".",
+    "hint": "Coba kata kunci lain, kurangi kata, atau hapus filter kategori.",
+    "prev": "Sebelumnya",
+    "next": "Berikutnya",
+    "noCommunity": "Tidak ada komunitas untuk \"{q}\"."
   }
 }

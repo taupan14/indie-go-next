@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { adminT } from "@/i18n/admin";
+import ConfirmAction from "@/components/ConfirmAction";
 import { requireSuperAdmin } from "@/lib/admin";
 import { resolveReport } from "./actions";
 
@@ -14,6 +16,7 @@ const REASON: Record<string, string> = {
 };
 
 export default async function Laporan() {
+  const tt = await adminT();
   const { sb } = await requireSuperAdmin();
   const { data: rows } = await sb
     .from("reports")
@@ -59,7 +62,7 @@ export default async function Laporan() {
     .select("id,username")
     .in("id", authorIds);
   const who = (id: string | null) =>
-    authors?.find((a: any) => a.id === id)?.username ?? "Akun dihapus";
+    authors?.find((a: any) => a.id === id)?.username ?? tt("Akun dihapus");
 
   const Btn = ({
     mode,
@@ -88,12 +91,16 @@ export default async function Laporan() {
   return (
     <main className="mx-auto max-w-3xl px-4 py-6">
       <Link href="/admin?tab=moderasi" className="text-xs text-muted">
-        ← Panel admin
+        {tt("← Panel admin")}
       </Link>
-      <h1 className="mb-1 mt-1 text-xl font-medium">Laporan ({list.length})</h1>
+      <h1 className="mb-1 mt-1 text-xl font-medium">
+        {tt("Laporan (")}
+        {list.length})
+      </h1>
       <p className="mb-4 text-xs text-muted">
-        Konten dengan 3 pelapor berbeda disembunyikan otomatis dan tetap muncul
-        di sini agar bisa dipulihkan.
+        {tt(
+          "Konten dengan 3 pelapor berbeda disembunyikan otomatis dan tetap muncul di sini agar bisa dipulihkan.",
+        )}
       </p>
       <div className="space-y-3">
         {list.map((g) => {
@@ -105,11 +112,11 @@ export default async function Laporan() {
               className="rounded-xl border border-border bg-surface p-4"
             >
               <p className="text-xs text-muted">
-                {g.kind === "thread" ? "Thread" : "Komentar"} · oleh{" "}
-                {who(g.item.author_id)} · {g.n} laporan{" "}
+                {g.kind === "thread" ? tt("Thread") : tt("Komentar")}{" "}
+                {tt("· oleh")} {who(g.item.author_id)} · {g.n} {tt("laporan")}{" "}
                 {hidden && (
                   <span className="ml-1 rounded-full bg-accent px-2 py-0.5">
-                    disembunyikan
+                    {tt("disembunyikan")}
                   </span>
                 )}
               </p>
@@ -126,24 +133,38 @@ export default async function Laporan() {
               )}
               <p className="mt-2 text-xs">
                 {Object.entries(g.reasons)
-                  .map(([k, v]) => `${REASON[k] ?? k} (${v})`)
+                  .map(([k, v]) => `${tt(REASON[k] ?? k)} (${v})`)
                   .join(" · ")}
               </p>
               <div className="mt-3 flex flex-wrap gap-2">
                 {hidden ? (
                   <>
-                    <Btn mode="restore" g={g} label="Pulihkan" />
-                    <Btn mode="keep" g={g} label="Tetap sembunyikan" danger />
+                    <Btn mode="restore" g={g} label={tt("Pulihkan")} />
+                    <Btn
+                      mode="keep"
+                      g={g}
+                      label={tt("Tetap sembunyikan")}
+                      danger
+                    />
                   </>
                 ) : (
                   <>
-                    <Btn mode="hide" g={g} label="Sembunyikan" danger />
-                    <Btn mode="dismiss" g={g} label="Abaikan laporan" />
+                    <Btn mode="hide" g={g} label={tt("Sembunyikan")} danger />
+                    <Btn mode="dismiss" g={g} label={tt("Abaikan laporan")} />
                     {g.item.author_id && (
-                      <Btn
-                        mode="suspend"
-                        g={g}
-                        label="Sembunyikan + suspend penulis"
+                      <ConfirmAction
+                        action={resolveReport}
+                        fields={{
+                          mode: "suspend",
+                          kind: g.kind,
+                          id: g.id,
+                          author: g.item.author_id,
+                        }}
+                        label={tt("Sembunyikan + blokir penulis")}
+                        title={tt("Sembunyikan konten dan blokir penulis?")}
+                        message="Konten ini disembunyikan dan akun penulisnya diblokir sampai admin membuka blokirnya."
+                        confirm="Ya, blokir"
+                        className="rounded-lg border border-danger px-3 py-1.5 text-xs text-danger"
                       />
                     )}
                   </>
@@ -154,7 +175,7 @@ export default async function Laporan() {
         })}
         {!list.length && (
           <p className="py-10 text-center text-sm text-muted">
-            Tidak ada laporan terbuka.
+            {tt("Tidak ada laporan terbuka.")}
           </p>
         )}
       </div>
