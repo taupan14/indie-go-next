@@ -50,14 +50,12 @@ export default async function ProfilePage({ params, searchParams }: P) {
       .select("id", { count: "exact", head: true })
       .eq("author_id", p.id)
       .eq("status", "published"),
-    sb
-      .from("community_members")
-      .select(
-        "joined_at,communities(slug,name,logo_url,banner_url,member_count)",
-      )
-      .eq("user_id", p.id)
-      .order("joined_at"),
+    sb.rpc("user_communities", { uid: p.id }),
   ]);
+  const memRows = ((mem.data ?? []) as any[]).map((r) => ({
+    joined_at: r.joined_at,
+    communities: r,
+  }));
   const points = Number(pts.data ?? 0);
   const { data: ps } = await sb
     .from("app_settings")
@@ -162,10 +160,10 @@ export default async function ProfilePage({ params, searchParams }: P) {
       {(own || !p.hide_communities) && (
         <>
           <h2 className="mb-2 text-sm font-medium">
-            {t("profile.communities")} ({mem.data?.length ?? 0})
+            {t("profile.communities")} ({memRows.length})
           </h2>
           <div className="mb-5 space-y-2">
-            {(mem.data ?? []).map(
+            {memRows.map(
               (r: any) =>
                 r.communities && (
                   <Link
@@ -188,7 +186,7 @@ export default async function ProfilePage({ params, searchParams }: P) {
                   </Link>
                 ),
             )}
-            {!mem.data?.length && (
+            {!memRows.length && (
               <p className="text-sm text-muted">{t("profile.noCommunities")}</p>
             )}
           </div>

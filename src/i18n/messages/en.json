@@ -66,7 +66,9 @@
     "close": "Close",
     "empty": "No communities yet.",
     "signInMembers": "Sign in to see the member list.",
-    "blocked": "You don't have access to this community."
+    "blocked": "You don't have access to this community.",
+    "privateTitle": "Private community",
+    "privateBody": "This community's threads, members, admin, announcements, and rules are visible only to its members. Join to see everything."
   },
   "auth": {
     "email": "Email",

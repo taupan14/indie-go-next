@@ -23,6 +23,10 @@ export default async function Komunitas({
   const {
     data: { user },
   } = await sb.auth.getUser();
+  const { data: me } = user
+    ? await sb.from("profiles").select("role").eq("id", user.id).maybeSingle()
+    : { data: null };
+  const superAdmin = me?.role === "super_admin";
 
   let mine: string[] = [];
   if (user) {
@@ -93,8 +97,9 @@ export default async function Komunitas({
                 </div>
                 <p className="font-medium">{c.name}</p>
                 <p className="mt-0.5 text-xs text-muted">
-                  {c.member_count} {t("community.membersCount")} ·{" "}
-                  {c.thread_count} {t("community.threads")}
+                  {c.member_count} {t("community.membersCount")}
+                  {(mine.includes(c.id) || superAdmin) &&
+                    ` · ${c.thread_count} ${t("community.threads")}`}
                 </p>
               </div>
             </Link>

@@ -54,6 +54,61 @@ export default async function CommunityPage({
       );
   }
 
+  // Komunitas privat: hanya anggota (dan super admin) yang melihat thread, anggota, admin, pengumuman, dan aturan
+  let memberNow = false,
+    superNow = false;
+  if (user) {
+    const [{ data: mm }, { data: pr }] = await Promise.all([
+      sb
+        .from("community_members")
+        .select("user_id")
+        .eq("community_id", c.id)
+        .eq("user_id", user.id)
+        .maybeSingle(),
+      sb.from("profiles").select("role").eq("id", user.id).maybeSingle(),
+    ]);
+    memberNow = !!mm;
+    superNow = pr?.role === "super_admin";
+  }
+  if (!memberNow && !superNow)
+    return (
+      <main className="mx-auto max-w-3xl px-4 py-5">
+        <div className="overflow-hidden rounded-xl border border-border">
+          <CommunityBanner c={c} className="h-28 md:h-36" />
+        </div>
+        <div className="my-4 flex flex-wrap items-center gap-3">
+          <CommunityLogo c={c} size={52} />
+          <div className="min-w-0 flex-1">
+            <h1 className="text-xl font-medium">{c.name}</h1>
+            <p className="text-xs text-muted">
+              {c.member_count} {t("community.membersCount")}
+            </p>
+          </div>
+          {user ? (
+            <form action={toggleMembership}>
+              <input type="hidden" name="community_id" value={c.id} />
+              <input type="hidden" name="slug" value={c.slug} />
+              <button className={btn}>{t("community.join")}</button>
+            </form>
+          ) : (
+            <Link href="/masuk" className={btn}>
+              {t("thread.signInToJoin")}
+            </Link>
+          )}
+        </div>
+        {c.description && <p className="mb-4 text-sm">{c.description}</p>}
+        <div className="rounded-xl border border-dashed border-border bg-surface p-6 text-center">
+          <p className="text-2xl" aria-hidden>
+            🔒
+          </p>
+          <p className="mt-1 font-medium">{t("community.privateTitle")}</p>
+          <p className="mx-auto mt-1 max-w-md text-sm text-muted">
+            {t("community.privateBody")}
+          </p>
+        </div>
+      </main>
+    );
+
   const q = cleanQuery(sp.q);
   const searching = q.length > 0;
   const urut = pickSort(sp.urut, searching);

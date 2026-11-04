@@ -66,7 +66,9 @@
     "close": "Tutup",
     "empty": "Belum ada komunitas.",
     "signInMembers": "Masuk untuk melihat daftar anggota.",
-    "blocked": "Anda tidak memiliki akses ke komunitas ini."
+    "blocked": "Anda tidak memiliki akses ke komunitas ini.",
+    "privateTitle": "Komunitas privat",
+    "privateBody": "Thread, anggota, admin, pengumuman, dan aturan komunitas ini hanya terlihat oleh anggotanya. Bergabunglah untuk melihat semuanya."
   },
   "auth": {
     "email": "Email",
